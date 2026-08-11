@@ -1,0 +1,87 @@
+name: Build Libbox
+
+on:
+  workflow_dispatch:
+    inputs:
+      sing_box_tag:
+        description: "sing-box source tag to build (e.g. v1.12.25)"
+        required: true
+        type: string
+      release_version:
+        description: "release version for this repo (e.g. 1.12.25)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout sing-box source
+        uses: actions/checkout@v4
+        with:
+          repository: SagerNet/sing-box
+          ref: ${{ inputs.sing_box_tag }}
+          path: sing-box
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: sing-box/go.mod
+
+      - name: Install gomobile
+        working-directory: sing-box
+        run: |
+          make lib_install
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Build Libbox.xcframework
+        working-directory: sing-box
+        run: |
+          gomobile init
+          gomobile bind -v \
+            -target ios \
+            -libname=box \
+            -tags-not-macos=with_low_memory \
+            -trimpath \
+            -buildvcs=false \
+            -ldflags "-X github.com/sagernet/sing-box/constant.Version=${{ inputs.sing_box_tag }} -s -w -buildid=" \
+            -tags with_utls \
+            ./experimental/libbox
+          zip -ry Libbox.xcframework.zip Libbox.xcframework
+
+      - name: Report size
+        working-directory: sing-box
+        run: |
+          echo "### Libbox ${{ inputs.release_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          du -sh Libbox.xcframework.zip >> "$GITHUB_STEP_SUMMARY"
+          find Libbox.xcframework -name "Libbox" -type f -exec du -sh {} \; >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ inputs.release_version }}" \
+            sing-box/Libbox.xcframework.zip \
+            --title "Libbox ${{ inputs.release_version }}" \
+            --notes "Built from SagerNet/sing-box ${{ inputs.sing_box_tag }} — tags: with_utls, with_low_memory (ios only)"
+
+      - name: Update Package.swift
+        run: |
+          CHECKSUM=$(shasum -a 256 sing-box/Libbox.xcframework.zip | awk '{print $1}')
+          URL="https://github.com/${{ github.repository }}/releases/download/${{ inputs.release_version }}/Libbox.xcframework.zip"
+          sed -e "s|__URL__|$URL|" \
+              -e "s|__CHECKSUM__|$CHECKSUM|" \
+              -e "s|__SOURCE__|SagerNet/sing-box ${{ inputs.sing_box_tag }}|" \
+              Package.swift.tmpl > Package.swift
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Package.swift
+          git commit -m "Libbox ${{ inputs.release_version }} (sing-box ${{ inputs.sing_box_tag }})"
+          git push
