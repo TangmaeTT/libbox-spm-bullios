@@ -1,7 +1,7 @@
 # libbox-spm-bullios
 
 `Libbox.xcframework` สำหรับ BullVPN iOS — build เองจาก [SagerNet/sing-box](https://github.com/SagerNet/sing-box)
-ไม่ได้ใช้ binary สำเร็จรูปของใคร
+
 
 ## ใช้ยังไง
 
