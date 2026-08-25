@@ -1,7 +1,7 @@
 # libbox-spm-bullios
 
 `Libbox.xcframework` สำหรับ BullVPN iOS — build เองจาก [SagerNet/sing-box](https://github.com/SagerNet/sing-box)
-
+ไม่ได้ใช้ binary สำเร็จรูปของใคร
 
 ## ใช้ยังไง
 
@@ -20,10 +20,15 @@ workflow จะ build → สร้าง release → เขียน `Package.s
 เอาเฉพาะที่ VLESS + REALITY ใช้จริง
 
 - `with_utls` — REALITY client + fingerprint chrome อยู่ใต้ tag นี้ ถอดแล้วต่อไม่ได้
+- `with_quic` — Hysteria2 ทั้งตัวอยู่ใต้ tag นี้ รวมถึง obfs salamander ถอดแล้ว config hy2
+  จะไม่พังตอน decode แต่ไปตายตอน start ด้วย unknown outbound type
 - `with_low_memory` — บีบ buffer เหลือ 16KB/8KB จำเป็นกับเพดาน memory ~50MB ของ Network Extension
 
-ที่ตัดออกจาก default ของ upstream: `with_gvisor`, `with_quic`, `with_wireguard`,
+ที่ตัดออกจาก default ของ upstream: `with_gvisor`, `with_wireguard`,
 `with_clash_api`, `with_conntrack`, `with_dhcp`, `with_tailscale`
+
+QUIC ถือ buffer มากกว่าเส้น TCP อยู่แล้ว การเปิด `with_quic` จึงต้องวัด memory ของ
+Network Extension ตอนต่อ hy2 จริง ไม่ใช่แค่ดูว่า build ผ่าน
 
 **เงื่อนไขที่ต้องรักษาไว้ฝั่งแอป** — config ต้องปักที่ `"stack": "system"` และ
 `includeAllNetworks` ต้องเป็น false ตลอด เพราะสองอย่างนี้คือสิ่งที่ต้องใช้ gvisor

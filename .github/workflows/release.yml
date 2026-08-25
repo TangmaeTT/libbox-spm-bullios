@@ -50,7 +50,7 @@ jobs:
             -trimpath \
             -buildvcs=false \
             -ldflags "-X github.com/sagernet/sing-box/constant.Version=${{ inputs.sing_box_tag }} -s -w -buildid=" \
-            -tags with_utls \
+            -tags with_gvisor,with_utls,with_quic,with_clash_api \
             ./experimental/libbox
           zip -ry Libbox.xcframework.zip Libbox.xcframework
 
@@ -70,7 +70,7 @@ jobs:
           gh release create "${{ inputs.release_version }}" \
             sing-box/Libbox.xcframework.zip \
             --title "Libbox ${{ inputs.release_version }}" \
-            --notes "Built from SagerNet/sing-box ${{ inputs.sing_box_tag }} — tags: with_utls, with_low_memory (ios only)"
+            --notes "Built from SagerNet/sing-box ${{ inputs.sing_box_tag }} — tags: with_gvisor, with_utls, with_quic, with_clash_api, with_low_memory (ios only)"
 
       - name: Update Package.swift
         run: |
