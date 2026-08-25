@@ -12,8 +12,8 @@ let package = Package(
   targets: [
     .binaryTarget(
       name: "Libbox",
-      url: "https://github.com/TangmaeTT/libbox-spm-bullios/releases/download/v1.13.18/Libbox.xcframework.zip",
-      checksum: "6848d92a4f58ef7cb9cc4be445ec595e40c953ab29a3ad20af1ce10d4fb3928a"
+      url: "https://github.com/TangmaeTT/libbox-spm-bullios/releases/download/v1.13.18-update1/Libbox.xcframework.zip",
+      checksum: "eb2fc0da667dc32f5e9acce81fc9bff8631ee19c2d808a78b56c8f221ee2b9c5"
     )
   ]
 )
