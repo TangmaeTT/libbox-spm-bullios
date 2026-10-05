@@ -44,7 +44,7 @@ jobs:
         run: |
           gomobile init
           gomobile bind -v \
-            -target ios \
+            -target ios,macos \
             -libname=box \
             -tags-not-macos=with_low_memory \
             -trimpath \
@@ -70,7 +70,7 @@ jobs:
           gh release create "${{ inputs.release_version }}" \
             sing-box/Libbox.xcframework.zip \
             --title "Libbox ${{ inputs.release_version }}" \
-            --notes "Built from SagerNet/sing-box ${{ inputs.sing_box_tag }} — tags: with_gvisor, with_utls, with_quic, with_clash_api, with_low_memory (ios only)"
+            --notes "Built from SagerNet/sing-box ${{ inputs.sing_box_tag }} — tags: with_gvisor, with_utls, with_quic, with_clash_api, with_low_memory (ios only) · slices: ios, ios-simulator, macos"
 
       - name: Update Package.swift
         run: |
